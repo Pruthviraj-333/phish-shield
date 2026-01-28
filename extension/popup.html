@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phish-Shield Security</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="popup-body">
+  <div class="popup-container">
+    <!-- Premium Header with Gradient -->
+    <div class="popup-header">
+      <div class="header-content">
+        <div class="shield-logo">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 2L4 10V18C4 28 10 36 20 38C30 36 36 28 36 18V10L20 2Z" fill="url(#shield-gradient)" stroke="white" stroke-width="2"/>
+            <path d="M14 20L18 24L26 16" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <defs>
+              <linearGradient id="shield-gradient" x1="4" y1="2" x2="36" y2="38">
+                <stop offset="0%" stop-color="#60A5FA"/>
+                <stop offset="100%" stop-color="#3B82F6"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="header-text">
+          <h1>Phish-Shield</h1>
+          <p class="tagline">Advanced Threat Protection</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="loading-state">
+      <div class="spinner-container">
+        <div class="modern-spinner"></div>
+        <p class="loading-text">Analyzing security...</p>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="content" class="main-content" style="display: none;">
+      
+      <!-- Status Card with Animation -->
+      <div class="status-card" id="status-card">
+        <div class="status-icon-container">
+          <div class="status-icon-bg" id="status-icon-bg"></div>
+          <div class="status-icon" id="status-icon">🔍</div>
+        </div>
+        <div class="status-text-container">
+          <h2 class="status-title" id="status-text">Checking...</h2>
+          <p class="status-subtitle" id="status-subtitle">Please wait</p>
+        </div>
+      </div>
+
+      <!-- Current URL Card -->
+      <div class="info-card">
+        <div class="card-header">
+          <svg class="card-icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+          </svg>
+          <h3>Current Page</h3>
+        </div>
+        <div class="url-container">
+          <div class="url-text" id="current-url" title="">Loading...</div>
+          <button class="copy-btn" id="copy-url-btn" title="Copy URL">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M4 2a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H6a2 2 0 01-2-2V2z"/>
+              <path d="M2 6a2 2 0 00-2 2v6a2 2 0 002 2h6a2 2 0 002-2v-2h-2v2H2V8h2V6H2z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Risk Meter with Modern Design -->
+      <div class="info-card">
+        <div class="card-header">
+          <svg class="card-icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z" clip-rule="evenodd"/>
+          </svg>
+          <h3>Threat Level</h3>
+        </div>
+        
+        <div class="risk-meter-container">
+          <!-- Circular Progress -->
+          <div class="circular-progress">
+            <svg class="progress-ring" width="120" height="120">
+              <circle class="progress-ring-bg" cx="60" cy="60" r="52" />
+              <circle class="progress-ring-fill" id="progress-ring" cx="60" cy="60" r="52" />
+            </svg>
+            <div class="progress-content">
+              <div class="risk-score-large" id="risk-score-large">0</div>
+              <div class="risk-label-small">/ 100</div>
+            </div>
+          </div>
+          
+          <!-- Risk Description -->
+          <div class="risk-description">
+            <div class="risk-level-badge" id="risk-level-badge">
+              <span id="risk-level-text">Safe</span>
+            </div>
+            <p class="risk-message" id="risk-message">This website appears to be legitimate</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detection Layers -->
+      <div class="info-card">
+        <div class="card-header">
+          <svg class="card-icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+          </svg>
+          <h3>Detection Summary</h3>
+        </div>
+        
+        <div class="detection-grid">
+          <!-- Heuristic Analysis -->
+          <div class="detection-item" id="heuristic-item">
+            <div class="detection-status">
+              <span class="status-dot" id="heuristic-dot"></span>
+              <span class="detection-name">Pattern Analysis</span>
+            </div>
+            <div class="detection-value" id="heuristic-value">-</div>
+          </div>
+          
+          <!-- Threat Intelligence -->
+          <div class="detection-item" id="threat-item">
+            <div class="detection-status">
+              <span class="status-dot" id="threat-dot"></span>
+              <span class="detection-name">Threat Database</span>
+            </div>
+            <div class="detection-value" id="threat-value">-</div>
+          </div>
+          
+          <!-- Machine Learning -->
+          <div class="detection-item" id="ml-item">
+            <div class="detection-status">
+              <span class="status-dot" id="ml-dot"></span>
+              <span class="detection-name">AI Detection</span>
+            </div>
+            <div class="detection-value" id="ml-value">-</div>
+          </div>
+        </div>
+        
+        <div class="primary-detection">
+          <span class="detection-label">Primary Method:</span>
+          <span class="detection-method" id="detection-method">-</span>
+        </div>
+      </div>
+
+      <!-- Expandable Technical Details -->
+      <div class="info-card expandable-card">
+        <button class="expand-btn" id="toggle-details">
+          <svg class="expand-icon" id="expand-icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+          </svg>
+          <span>Technical Details</span>
+        </button>
+        
+        <div class="expandable-content" id="technical-details" style="display: none;">
+          <div class="tech-section">
+            <h4>Pattern Analysis</h4>
+            <div class="tech-content" id="heuristic-details">Loading...</div>
+          </div>
+          
+          <div class="tech-section">
+            <h4>Threat Intelligence</h4>
+            <div class="tech-content" id="threat-intel-details">Loading...</div>
+          </div>
+          
+          <div class="tech-section">
+            <h4>AI Model Analysis</h4>
+            <div class="tech-content" id="ml-details">Loading...</div>
+          </div>
+          
+          <div class="tech-section">
+            <h4>Scan Timestamp</h4>
+            <div class="tech-content" id="scan-time">-</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button class="btn-action btn-rescan" id="rescan-btn">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
+          </svg>
+          Rescan Page
+        </button>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div id="error" class="error-state" style="display: none;">
+      <div class="error-icon">
+        <svg width="60" height="60" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+        </svg>
+      </div>
+      <h3 class="error-title">Connection Error</h3>
+      <p class="error-message" id="error-message">Unable to connect to security service</p>
+      <button class="btn-retry" id="retry-btn">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
+        </svg>
+        Try Again
+      </button>
+    </div>
+
+    <!-- Premium Footer -->
+    <div class="popup-footer">
+      <div class="footer-content">
+        <span class="footer-text">Protected by Phish-Shield</span>
+        <span class="footer-version">v1.0</span>
+      </div>
+      <div class="footer-indicator">
+        <span class="status-indicator" id="connection-status"></span>
+        <span class="status-text">Connected</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
