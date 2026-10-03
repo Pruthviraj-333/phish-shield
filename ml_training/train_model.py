@@ -1,4 +1,4 @@
-"""
+﻿"""
 ML Training Script for Phishing URL Detection
 Optimized for Kaggle Web Page Phishing Detection Dataset
 Dataset: https://www.kaggle.com/datasets/shashwatwork/web-page-phishing-detection-dataset
@@ -120,10 +120,14 @@ def load_and_prepare_data(csv_path):
     # Remove NaN values
     df = df.dropna()
     
-    # Convert labels to int if needed
+    # Convert labels to int (handles 'legitimate'/'phishing' strings or 0/1 ints)
+    label_map = {'legitimate': 0, 'phishing': 1, 'benign': 0, 'malicious': 1,
+                 'safe': 0, 'unsafe': 1, '0': 0, '1': 1}
+    df['label'] = df['label'].astype(str).str.lower().str.strip()
+    df['label'] = df['label'].map(label_map).fillna(df['label'])
     df['label'] = df['label'].astype(int)
     
-    print(f"✓ Dataset loaded: {len(df):,} URLs")
+    print(f"âœ“ Dataset loaded: {len(df):,} URLs")
     print(f"\nClass Distribution:")
     print(df['label'].value_counts().sort_index())
     print(f"\nBalance: {df['label'].value_counts(normalize=True).to_dict()}")
@@ -140,7 +144,7 @@ def load_and_prepare_data(csv_path):
             print(f"  Progress: {idx:,}/{total:,} ({idx/total*100:.1f}%)")
         features_list.append(extractor.extract_features(url))
     
-    print(f"✓ Feature extraction complete: {total:,}/{total:,} (100.0%)\n")
+    print(f"âœ“ Feature extraction complete: {total:,}/{total:,} (100.0%)\n")
     
     # Convert to DataFrame
     features_df = pd.DataFrame(features_list)
@@ -162,8 +166,8 @@ def train_model(X, y):
         X, y, test_size=0.2, random_state=42, stratify=y
     )
     
-    print(f"✓ Training set: {len(X_train):,} samples")
-    print(f"✓ Test set: {len(X_test):,} samples")
+    print(f"âœ“ Training set: {len(X_train):,} samples")
+    print(f"âœ“ Test set: {len(X_test):,} samples")
     
     # Calculate class weights for balanced learning
     class_counts = y_train.value_counts()
@@ -199,7 +203,7 @@ def train_model(X, y):
     
     model.fit(X_train, y_train)
     
-    print("\n✓ Training complete!\n")
+    print("\nâœ“ Training complete!\n")
     
     print("=" * 70)
     print("MODEL EVALUATION")
@@ -212,8 +216,8 @@ def train_model(X, y):
     accuracy = accuracy_score(y_test, y_pred)
     roc_auc = roc_auc_score(y_test, y_pred_proba)
     
-    print(f"\n🎯 ACCURACY: {accuracy:.4f} ({accuracy*100:.2f}%)")
-    print(f"📊 ROC-AUC SCORE: {roc_auc:.4f}\n")
+    print(f"\nðŸŽ¯ ACCURACY: {accuracy:.4f} ({accuracy*100:.2f}%)")
+    print(f"ðŸ“Š ROC-AUC SCORE: {roc_auc:.4f}\n")
     
     print("Classification Report:")
     print("-" * 70)
@@ -261,7 +265,7 @@ def train_model(X, y):
     print("\nTop 10 Most Important Features:")
     print("-" * 70)
     for idx, row in feature_importance.head(10).iterrows():
-        bar = '█' * int(row['importance'] * 100)
+        bar = 'â–ˆ' * int(row['importance'] * 100)
         print(f"{row['feature']:.<25} {row['importance']:.4f} {bar}")
     print()
     
@@ -271,28 +275,28 @@ def train_model(X, y):
     print("=" * 70)
     
     if accuracy >= 0.93:
-        print("\n✅ EXCELLENT: Model performance is outstanding!")
+        print("\nâœ… EXCELLENT: Model performance is outstanding!")
         print("   - Ready for production deployment")
         print("   - High accuracy with good balance")
     elif accuracy >= 0.90:
-        print("\n✅ VERY GOOD: Model performance is strong")
+        print("\nâœ… VERY GOOD: Model performance is strong")
         print("   - Suitable for production use")
         print("   - Consider fine-tuning for edge cases")
     elif accuracy >= 0.85:
-        print("\n⚠️  GOOD: Model performance is acceptable")
+        print("\nâš ï¸  GOOD: Model performance is acceptable")
         print("   - May need additional training data")
         print("   - Monitor false positives in production")
     else:
-        print("\n⚠️  NEEDS IMPROVEMENT: Model accuracy is below target")
+        print("\nâš ï¸  NEEDS IMPROVEMENT: Model accuracy is below target")
         print("   - Consider collecting more training data")
         print("   - Try different feature engineering")
     
     if fpr < 0.05:
-        print(f"   - Low false positive rate ({fpr:.2%}) - Excellent! ✅")
+        print(f"   - Low false positive rate ({fpr:.2%}) - Excellent! âœ…")
     elif fpr < 0.10:
-        print(f"   - Moderate false positive rate ({fpr:.2%}) - Acceptable ⚠️")
+        print(f"   - Moderate false positive rate ({fpr:.2%}) - Acceptable âš ï¸")
     else:
-        print(f"   - High false positive rate ({fpr:.2%}) - Needs attention ❌")
+        print(f"   - High false positive rate ({fpr:.2%}) - Needs attention âŒ")
     
     return model, feature_importance
 
@@ -302,21 +306,69 @@ def save_model(model, feature_importance, output_path):
     
     # Save model
     joblib.dump(model, output_path)
-    print(f"✓ Model saved to: {output_path}")
+    print(f"âœ“ Model saved to: {output_path}")
     
     # Get file size
     file_size = os.path.getsize(output_path) / (1024 * 1024)
-    print(f"✓ Model size: {file_size:.2f} MB")
+    print(f"âœ“ Model size: {file_size:.2f} MB")
     
     # Save feature names
     feature_names_path = output_path.replace('phish_model.pkl', 'feature_names.pkl')
     joblib.dump(list(feature_importance['feature']), feature_names_path)
-    print(f"✓ Feature names saved to: {feature_names_path}")
+    print(f"âœ“ Feature names saved to: {feature_names_path}")
     
     # Save feature importance
     importance_path = output_path.replace('phish_model.pkl', 'feature_importance.csv')
     feature_importance.to_csv(importance_path, index=False)
-    print(f"✓ Feature importance saved to: {importance_path}")
+    print(f"âœ“ Feature importance saved to: {importance_path}")
+
+def _generate_sample_dataset(output_path: str, n_samples: int = 2000):
+    """Generate a synthetic sample dataset for demonstration purposes."""
+    import random
+    random.seed(42)
+
+    legit_domains = [
+        "google.com", "youtube.com", "facebook.com", "amazon.com", "wikipedia.org",
+        "twitter.com", "reddit.com", "instagram.com", "linkedin.com", "microsoft.com",
+        "apple.com", "github.com", "stackoverflow.com", "netflix.com", "paypal.com",
+        "ebay.com", "cnn.com", "bbc.com", "nytimes.com", "theguardian.com",
+    ]
+    phishing_patterns = [
+        "paypa1.com", "g00gle.com", "faceb00k.com", "secure-login-{}.com",
+        "account-verify-{}.info", "banking-secure-{}.net", "confirm-account-{}.xyz",
+        "{}-login-secure.com", "update-account-info-{}.com", "verify-your-account-{}.net",
+    ]
+    paths = ["", "/login", "/signin", "/account", "/verify", "/secure", "/update",
+             "/password", "/confirm", "/banking/login", "/user/profile"]
+    params = ["", "?id=1234", "?ref=email", "?token=abc123", "?redirect=home",
+              "?session=xyz&verify=1"]
+
+    records = []
+    half = n_samples // 2
+
+    # Legitimate URLs (label = 0)
+    for _ in range(half):
+        domain = random.choice(legit_domains)
+        path = random.choice(paths)
+        param = random.choice(params)
+        scheme = random.choice(["https://", "https://www."])
+        records.append({"url": f"{scheme}{domain}{path}{param}", "label": 0})
+
+    # Phishing URLs (label = 1)
+    for _ in range(half):
+        pattern = random.choice(phishing_patterns)
+        rand_str = str(random.randint(100, 9999))
+        domain = pattern.format(rand_str)
+        path = random.choice(paths)
+        param = random.choice(params)
+        scheme = random.choice(["http://", "http://www."])
+        records.append({"url": f"{scheme}{domain}{path}{param}", "label": 1})
+
+    random.shuffle(records)
+    df = pd.DataFrame(records)
+    df.to_csv(output_path, index=False)
+    print(f"âœ“ Sample dataset generated: {len(df)} URLs â†’ {output_path}")
+
 
 def main():
     """Main training pipeline"""
@@ -326,14 +378,37 @@ def main():
     print("\nOptimized for Kaggle Web Page Phishing Detection Dataset")
     print("Dataset: https://www.kaggle.com/datasets/shashwatwork/web-page-phishing-detection-dataset\n")
     
-    # Paths
-    dataset_path = 'D:\phish-shield\ml_training\datasets'
-    model_output_path = 'backend/models/phish_model.pkl'
+    # Paths - use paths relative to this script's location for portability
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(script_dir)
+    datasets_dir = os.path.join(script_dir, 'datasets')
+    model_output_path = os.path.join(project_root, 'backend', 'models', 'phish_model.pkl')
+    
+    # Find CSV in datasets folder
+    os.makedirs(datasets_dir, exist_ok=True)
+    dataset_path = None
+    possible_names = [
+        'phishing_urls.csv', 'dataset_full.csv', 'phishing_site_urls.csv',
+        'phishing.csv', 'dataset_phishing.csv', 'web-page-phishing.csv'
+    ]
+    for name in possible_names:
+        candidate = os.path.join(datasets_dir, name)
+        if os.path.exists(candidate):
+            dataset_path = candidate
+            break
+    
+    # If no dataset found, generate a sample one
+    if dataset_path is None:
+        print("âš ï¸  No dataset found. Generating a sample dataset for demonstration...")
+        print("   For best accuracy, use a real dataset from Kaggle.")
+        sample_path = os.path.join(datasets_dir, 'phishing_urls.csv')
+        _generate_sample_dataset(sample_path)
+        dataset_path = sample_path
     
     # Check if dataset exists
     if not os.path.exists(dataset_path):
-        print(f"❌ ERROR: Dataset not found at: {dataset_path}")
-        print("\n📥 REQUIRED STEPS:")
+        print(f"âŒ ERROR: Dataset not found at: {dataset_path}")
+        print("\nðŸ“¥ REQUIRED STEPS:")
         print("-" * 70)
         print("1. Download dataset from:")
         print("   https://www.kaggle.com/datasets/shashwatwork/web-page-phishing-detection-dataset")
@@ -350,24 +425,21 @@ def main():
     print(f"Dataset file size: {file_size_mb:.2f} MB")
     
     if file_size_mb < 1:
-        print("\n⚠️  WARNING: Dataset appears very small!")
+        print("\nâš ï¸  WARNING: Dataset appears very small!")
         print("   Expected size: 5-15 MB for Kaggle dataset")
         print("   Current size:", f"{file_size_mb:.2f} MB")
-        response = input("\nContinue anyway? (y/n): ")
-        if response.lower() != 'y':
-            print("Training cancelled.")
-            return
+        print("   Continuing with sample dataset...")
     
     # Load and prepare data
     X, y = load_and_prepare_data(dataset_path)
     
     if X is None or y is None:
-        print("\n❌ ERROR: Failed to load dataset")
+        print("\nâŒ ERROR: Failed to load dataset")
         return
     
     # Check dataset size
     if len(X) < 1000:
-        print(f"\n⚠️  WARNING: Very small dataset ({len(X)} samples)")
+        print(f"\nâš ï¸  WARNING: Very small dataset ({len(X)} samples)")
         print("   Recommended minimum: 10,000 samples")
         print("   For best results: 50,000+ samples")
         response = input("\nContinue anyway? (y/n): ")
@@ -385,10 +457,10 @@ def main():
     save_model(model, feature_importance, model_output_path)
     
     print("\n" + "=" * 70)
-    print("✅ TRAINING COMPLETE!")
+    print("âœ… TRAINING COMPLETE!")
     print("=" * 70)
     print("\nYour phishing detection model is ready to use!")
-    print("\n📋 NEXT STEPS:")
+    print("\nðŸ“‹ NEXT STEPS:")
     print("-" * 70)
     print("1. Start the backend server:")
     print("   cd backend")
@@ -406,7 +478,7 @@ def main():
     print("   - Check browser console for scan results")
     print("   - Click extension icon for detailed reports")
     print("-" * 70)
-    print("\n🛡️  Stay safe online!")
+    print("\nðŸ›¡ï¸  Stay safe online!")
     print()
 
 if __name__ == "__main__":

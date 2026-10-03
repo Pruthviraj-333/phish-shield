@@ -40,6 +40,8 @@ heuristic_engine = HeuristicEngine()
 try:
     if os.path.exists(MODEL_PATH):
         model = joblib.load(MODEL_PATH)
+        if hasattr(model, 'n_jobs'):
+            model.n_jobs = 1
         logger.info("ML model loaded successfully")
     else:
         logger.warning(f"Model not found at {MODEL_PATH}. ML detection will be disabled.")
@@ -102,13 +104,22 @@ def calculate_risk_score(heuristic_score: int, ml_probability: float, threat_int
         Combined risk score (0-100)
     """
     # Weight the different components
-    weighted_heuristic = heuristic_score * 0.4
-    weighted_ml = (ml_probability * 100) * 0.4
+    # ML gets the highest weight (60%) as it's the most reliable signal
+    # Heuristic gets 30% — good for catching pattern-based phishing
+    # Threat intel gets 10% (placeholder — would be much higher with real APIs)
+    weighted_heuristic = heuristic_score * 0.30
+    weighted_ml = (ml_probability * 100) * 0.60
     weighted_threat = 100 if threat_intel_hit else 0
-    weighted_threat *= 0.2
-    
+    weighted_threat *= 0.10
+
+    # Boost score when both ML and heuristic agree it's suspicious
+    if ml_probability > 0.55 and heuristic_score >= 20:
+        agreement_bonus = min(15, (ml_probability - 0.5) * 60)
+    else:
+        agreement_bonus = 0
+
     # Calculate final score
-    final_score = int(weighted_heuristic + weighted_ml + weighted_threat)
+    final_score = int(weighted_heuristic + weighted_ml + weighted_threat + agreement_bonus)
     return min(100, max(0, final_score))
 
 @router.post("/scan-url", response_model=URLScanResponse)
@@ -192,16 +203,16 @@ async def scan_url(request: URLScanRequest):
         # Calculate combined risk score
         risk_score = calculate_risk_score(heuristic_score, ml_probability, threat_intel_hit)
         
-        # Determine final status (threshold: 50)
-        is_unsafe = risk_score >= 50
+        # Determine final status (threshold: 30 — tuned for real-world phishing patterns)
+        is_unsafe = risk_score >= 30
         status = "unsafe" if is_unsafe else "safe"
-        
+
         # Determine primary detection method
         if threat_intel_hit:
             detection_method = "Threat Intelligence"
-        elif is_suspicious_heuristic and heuristic_score >= 60:
+        elif is_suspicious_heuristic and heuristic_score >= 45:
             detection_method = "Heuristic Analysis"
-        elif ml_prediction == 1 and ml_probability > 0.7:
+        elif ml_prediction == 1 and ml_probability >= 0.55:
             detection_method = "Machine Learning"
         elif is_unsafe:
             detection_method = "Combined Analysis"
